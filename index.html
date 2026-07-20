@@ -124,6 +124,13 @@
 
   footer { border-top: 2px solid var(--ink); padding: 28px 0; margin-top: 48px; font-size: 13px; color: var(--mid); }
 </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5GXQXQES4V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-5GXQXQES4V');
+</script>
 </head>
 <body>
 
@@ -302,6 +309,21 @@ function calculate() {
   const days = durationDays(ti, over50);
   const b = dailyBenefit(wage);
   const total = b.daily * days;
+
+  if (typeof gtag === 'function') {
+    gtag('event', 'calc_complete', {
+      cap: b.capNote === 'upper' ? 'upper_capped'
+        : b.capNote === 'lower' ? 'lower_floored' : 'normal',
+      tenure: TENURE_LABELS[ti] || String(ti),
+      age_group: over50 ? 'over50_or_disabled' : 'under50',
+      days_band: days <= 120 ? '120d'
+        : days <= 180 ? '150_180d'
+        : days <= 240 ? '210_240d' : '270d',
+      total_band: total < 5000000 ? 'under_500man'
+        : total < 10000000 ? '500_1000man'
+        : total < 15000000 ? '1000_1500man' : 'over_1500man'
+    });
+  }
 
   $('result').style.display = 'block';
   $('mainAmount').textContent = won(total);
